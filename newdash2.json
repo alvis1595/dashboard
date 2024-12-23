@@ -1,0 +1,94 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": null,
+    "title": "Jenkins Pipeline Monitoring",
+    "timezone": "browser",
+    "version": 1,
+    "schemaVersion": 37,
+    "tags": ["Jenkins", "Prometheus"],
+    "style": "dark",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "10s",
+    "panels": [
+      {
+        "type": "stat",
+        "title": "Pipeline Éxitos",
+        "targets": [
+          {
+            "expr": "sum by (job) (increase(default_jenkins_builds_success_build_count{instance=\"$nodo_jenkins\", job=\"$pipeline\"}[$__interval]))",
+            "legendFormat": "{{job}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Pipeline Fallos",
+        "targets": [
+          {
+            "expr": "sum by (job) (increase(default_jenkins_builds_failed_build_count{instance=\"$nodo_jenkins\", job=\"$pipeline\"}[$__interval]))",
+            "legendFormat": "{{job}}",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Estado Actual del Pipeline",
+        "targets": [
+          {
+            "expr": "sum by (job) (default_jenkins_builds_last_build_result_ordinal{instance=\"$nodo_jenkins\", job=\"$pipeline\"} == 2)",
+            "legendFormat": "{{job}}",
+            "refId": "C"
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 0,
+          "y": 6
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "nodo_jenkins",
+          "type": "query",
+          "label": "Nodo Jenkins",
+          "datasource": "Prometheus",
+          "query": "label_values(default_jenkins_up, instance)",
+          "includeAll": false,
+          "refresh": 1,
+          "hide": 0
+        },
+        {
+          "name": "pipeline",
+          "type": "query",
+          "label": "Pipeline",
+          "datasource": "Prometheus",
+          "query": "label_values(default_jenkins_builds_success_build_count{instance=\"$nodo_jenkins\"}, job)",
+          "includeAll": false,
+          "refresh": 1,
+          "hide": 0
+        }
+      ]
+    }
+  }
+}
