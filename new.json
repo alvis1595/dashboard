@@ -1,0 +1,136 @@
+{
+  "templating": {
+    "list": [
+      {
+        "name": "Node",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(default_jenkins_builds_total_build_count, instance)",
+        "refresh": 2,
+        "includeAll": false,
+        "multi": false,
+        "sort": 1,
+        "hide": 0
+      },
+      {
+        "name": "Pipeline",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(default_jenkins_builds_total_build_count{instance=\"$Node\"}, job)",
+        "refresh": 2,
+        "includeAll": false,
+        "multi": false,
+        "sort": 1,
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Pipelines Exitosos",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(default_jenkins_builds_success_build_count{instance=\"$Node\", job=\"$Pipeline\"})",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      }
+    },
+    {
+      "title": "Consumo de CPU por Nodo",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum by (instance) (rate(node_cpu_seconds_total{mode!='idle', instance=\"$Node\"}[5m]))",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "continuous-GrYlRd"
+          }
+        }
+      }
+    },
+    {
+      "title": "Consumo de RAM por Nodo",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "node_memory_Active_bytes{instance=\"$Node\"} / node_memory_MemTotal_bytes{instance=\"$Node\"} * 100",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "continuous-GrYlRd"
+          }
+        }
+      }
+    },
+    {
+      "title": "Pipelines Fallidos",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(default_jenkins_builds_failed_build_count{instance=\"$Node\", job=\"$Pipeline\"})",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      }
+    },
+    {
+      "title": "Tiempo Promedio de Ejecución",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "avg by (instance, job) (rate(default_jenkins_builds_duration_milliseconds_summary_sum{instance=\"$Node\", job=\"$Pipeline\"}[5m]) / rate(default_jenkins_builds_duration_milliseconds_summary_count{instance=\"$Node\", job=\"$Pipeline\"}[5m]))",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      }
+    }
+  ],
+  "title": "Jenkins Monitoring Dashboard",
+  "version": 1,
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  }
+}
